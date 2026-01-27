@@ -1,9 +1,10 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
+import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import frc.robot.Constants.intakeConstants;
-
 
 public class Intake extends SubsystemBase{
 
@@ -15,11 +16,16 @@ public class Intake extends SubsystemBase{
         IDLE,INTAKING,COUGHING,FULL
     }
 
-    public double motorDirector;
+    public double speedCapout;
+    public double autoTimer;
+    public double tImer = Timer.getFPGATimestamp();
+    public double TimeElapse = tImer - autoTimer;
     private intakeStates intakeStatus = intakeStates.IDLE;
     private desIntakeActions desiredState = desIntakeActions.NONE;
-    public final PWMSparkMax intakeDude1 = new PWMSparkMax(0);
-    public final PWMSparkMax intakeDude2 = new PWMSparkMax(1);
+    public final SparkMax intakeDude1 = new SparkMax(0);
+    public final SparkMax intakeDude2 = new SparkMax(1);
+    
+ 
 
     private Intake() {
         //intakeDude1.disable();
@@ -47,39 +53,46 @@ public class Intake extends SubsystemBase{
         }
     }
     /** Also known as the execute state method. */
-    private void runStateMachine(){
+    public void runStateMachine(){
         switch (intakeStatus) {
             case IDLE:
-                motorDirector = 0.0;
-                motority();
+                speedCapout = 0.0;
                 break;
             case INTAKING:
-                motorDirector = intakeConstants.intakeSpeed;
-                motority();
-
+                speedCapout = intakeConstants.intakeSpeed;
                 break;
             case COUGHING:
-                motorDirector = intakeConstants.coughSpeed;
-                motority();
+                speedCapout = intakeConstants.coughSpeed;
                 break;
             case FULL:
-                motorDirector = 0.0;
-                motority();
+                speedCapout = 0.0;
                 break;
         }
     }
 
-    public void motority(){
-        intakeDude1.set(motorDirector);
-        intakeDude2.set(motorDirector);
+    public void motority(double speed){
+        intakeDude1.set(speed);
+        intakeDude2.set(-speed);
     }
 
     //Set methods to begin intaking
-    public void beginIntaking()
+    public void beginIntaking(desIntakeActions intakeNeedMove)
     {
-        desiredState = desIntakeActions.INTAKE;
-        setState(desiredState);
+        setState(intakeNeedMove);
     }
+
+    public double ramp()
+    {
+        double x = TimeElapse;
+        double rampRate = ((14*(Math.log(x+0.72))+2)*0.1);
+        return rampRate;
+    }
+
+    public double clampedRate(double rampRate)
+    {
+        double output;
+        return output = Math.max(0.0, Math.min(intakeConstants.Speed, rampRate));
+    }    
 }
 
 /*
