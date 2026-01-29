@@ -22,8 +22,8 @@ public class Intake extends SubsystemBase{
     public double TimeElapse = tImer - autoTimer;
     private intakeStates intakeStatus = intakeStates.IDLE;
     private desIntakeActions desiredState = desIntakeActions.NONE;
-    public final SparkMax intakeDude1 = new SparkMax(0);
-    public final SparkMax intakeDude2 = new SparkMax(1);
+    public final PWMSparkMax intakeDude1 = new PWMSparkMax(0);
+    public final PWMSparkMax intakeDude2 = new PWMSparkMax(1);
     
  
 
