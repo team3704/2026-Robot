@@ -12,17 +12,19 @@
 //where am i ?!??!?!
 
 package frc.robot.commands;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.swerve.SwerveDrivetrain;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.LimelightHelpers;
 import frc.robot.LimelightHelpers.LimelightResults;
-import frc.robot.subsystems.Swerve;
 
 /** An example command that uses an example subsystem. */
 public class AdjustDistance extends Command {
 
     @SuppressWarnings({ "PMD.UnusedPrivateField", "PMD.SingularField" })
-    private final Swerve m_swerve;
+    //private final SwerveDrivetrain m_swerve = new SwerveDrivetrain<>(null, null, null, null, null)
+    private TalonFX m_swerve = new TalonFX(0);
 
     /**
      * Creates a new ExampleCommand.
