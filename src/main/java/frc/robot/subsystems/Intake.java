@@ -91,7 +91,7 @@ public class Intake extends SubsystemBase{
     public double clampedRate(double rampRate)
     {
         double output;
-        return output = Math.max(0.0, Math.min(intakeConstants.Speed, rampRate));
+        return output = Math.max(0.0, Math.min(intakeConstants.intakeSpeed, rampRate));
     }    
 }
 
