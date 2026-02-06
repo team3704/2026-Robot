@@ -13,28 +13,30 @@
 
 package frc.robot.commands;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.swerve.SwerveDrivetrain;
+import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.LimelightHelpers;
-import frc.robot.LimelightHelpers.LimelightResults;
+import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 /** An example command that uses an example subsystem. */
 public class AdjustDistance extends Command {
 
     @SuppressWarnings({ "PMD.UnusedPrivateField", "PMD.SingularField" })
     //private final SwerveDrivetrain m_swerve = new SwerveDrivetrain<>(null, null, null, null, null)
-    private TalonFX m_swerve = new TalonFX(0);
+    private CommandSwerveDrivetrain m_swerve;
+    private double ShootingDistance = 36.0;
+    // Use open-loop control for drive motors
 
     /**
      * Creates a new ExampleCommand.
      *
      * @param subsystem The subsystem used by this command.
      */
-    public AdjustDistance(Swerve subsystem) {
+    public AdjustDistance(CommandSwerveDrivetrain subsystem) {
         m_swerve = subsystem;
         // Use addRequirements() here to declare subsystem dependencies.
-        addRequirements(subsystem);
+        //addRequirements(subsystem);
 
         double targetOffsetAngle_Vertical = LimelightHelpers.getTY("limelight");
 
@@ -57,9 +59,14 @@ public class AdjustDistance extends Command {
         double angleToGoalRadians = angleToGoalDegrees * (Math.PI / 180.0);
 
         //calculate distance
-        double distanceFromLimelightToGoalInches =
+        double distance =
             (goalHeightInches - limelightLensHeightInches) /
             Math.tan(angleToGoalRadians);
+        
+        //hell yeah
+        m_swerve.applyRequest(() -> (
+            m_swerve.drive.withVelocityX((ShootingDistance - distance) * .1)
+        ));
     }
 
     // Called when the command is initially scheduled.
