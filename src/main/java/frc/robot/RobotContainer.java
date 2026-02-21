@@ -6,6 +6,7 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
+import com.ctre.phoenix6.swerve.SwerveModule;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveRequest.FieldCentric;
 import com.ctre.phoenix6.swerve.SwerveRequest;
@@ -17,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import com.ctre.phoenix6.hardware.*;
 
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -39,11 +41,14 @@ public class RobotContainer {
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
     /* Setting up bindings for necessary control of the swerve drive platform */
-    private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
+    private final SwerveRequest.RobotCentric drive = new SwerveRequest.RobotCentric()
             .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
+
+    private final TalonFX hi = new TalonFX(0);
+    
 
     private final Telemetry logger = new Telemetry(MaxSpeed);
     private double ShootingDistance = 25.0;
@@ -58,15 +63,31 @@ public class RobotContainer {
     configureBindings();
   }
 
-      public SwerveRequest.FieldCentric yeah() {
-                    drive.withVelocityX(-joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
-                    .withVelocityY(-joystick.getLeftY() * MaxSpeed) // Drive left with negative X (left)
+      public SwerveRequest.RobotCentric yeah() {
+                    drive.withVelocityX(joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
+                    .withVelocityY(joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
                     .withRotationalRate(-joystick.getRightX() * MaxAngularRate); // Drive counterclockwise with negative X (left)
+
+                    //hi.set(0.67);
+                    //System.out.println(drivetrain.getModules().);
+                    double TotalVoltage = 0.0;
+                    for(SwerveModule<TalonFX, TalonFX, CANcoder> dude : drivetrain.getModules()) {
+                      if(!dude.getClass().equals(CANcoder.class)) {
+                        dude.getDriveMotor().getMotorVoltage().refresh();
+                        TotalVoltage += Math.abs(dude.getDriveMotor().getMotorVoltage().getValueAsDouble());
+
+                        dude.getSteerMotor().getMotorVoltage().refresh();
+                        TotalVoltage += Math.abs(dude.getSteerMotor().getMotorVoltage().getValueAsDouble());
+                      }
+                    }
+
+                    System.out.println(TotalVoltage);
 
                     if(LimelightHelpers.getTV("limelight-larry")) {
                          double targetOffsetAngle_Vertical = LimelightHelpers.getTY("limelight-larry");
 
         //hell yeah copy and pasted documentation code
+          
 
         // how many degrees back is your limelight rotated from perfectly vertical?
         double limelightMountAngleDegrees = 25.0; //assumed
@@ -89,7 +110,7 @@ public class RobotContainer {
             (goalHeightInches - limelightLensHeightInches) /
             Math.tan(angleToGoalRadians);
 
-            drive.withVelocityX((ShootingDistance - distance) * .1);
+            drive.withVelocityX((ShootingDistance - distance) * .1 * MaxSpeed);
 
             System.out.println(distance);
 
@@ -99,7 +120,6 @@ public class RobotContainer {
                     return drive;
         
     }
-
 
   /**
    * Use this method to define your trigger->command mappings. Triggers can be created via the
@@ -135,6 +155,7 @@ public class RobotContainer {
         );
 
         joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
+
         joystick.b().whileTrue(drivetrain.applyRequest(() ->
             point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
         ));
