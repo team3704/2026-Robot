@@ -11,6 +11,8 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveRequest.FieldCentric;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -109,8 +111,18 @@ public class RobotContainer {
         double distance =
             (goalHeightInches - limelightLensHeightInches) /
             Math.tan(angleToGoalRadians);
+            
+            //double error = ShootingDistance - distance;
+            double kP = 0.1;
+            double kI = 0.1;
+            double kD = 0.1;
+            PIDController distancePID = new PIDController(kP, kI, kD);
+            double output = distancePID.calculate(distance, ShootingDistance);
 
-            drive.withVelocityX((ShootingDistance - distance) * .1 * MaxSpeed);
+            output = MathUtil.clamp(output, -0.6, 0.6); //used to limit the output to a min and a max
+
+            //drive.withVelocityX((ShootingDistance - distance) * .1 * MaxSpeed);
+            drive.withVelocityX(output);
 
             System.out.println(distance);
 
