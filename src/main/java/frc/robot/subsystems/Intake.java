@@ -16,7 +16,7 @@ import edu.wpi.first.wpilibj.Timer;
 public class Intake extends SubsystemBase
 {
     private final TalonFX leftIntakeLeader;
-    private final TalonFX rightIntakeFollower;
+   // private final TalonFX rightIntakeFollower;
     private final TalonFXConfiguration intakeConfigs = new TalonFXConfiguration();
 
     private IntakeState currentState = IntakeState.IDLE;
@@ -32,7 +32,7 @@ public class Intake extends SubsystemBase
     
     private int jamCount;
 
-    private final double intakeSpeed = 0.75;
+    private final double intakeSpeed = 1;
     private final double ejectSpeed = -0.8;
     private final double holdingSpeed = 0.10;
 
@@ -56,8 +56,8 @@ public class Intake extends SubsystemBase
      */
     public Intake()
     {
-      leftIntakeLeader = new TalonFX(0);
-      rightIntakeFollower = new TalonFX(1);
+      leftIntakeLeader = new TalonFX(39);
+      //rightIntakeFollower = new TalonFX(16);
 
       intakeConfigs.MotorOutput.NeutralMode = NeutralModeValue.Coast;
       intakeConfigs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
@@ -76,8 +76,8 @@ public class Intake extends SubsystemBase
 
       //You might need to change the direction of the follower motor, if so
       //leftConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Negative;
-      rightIntakeFollower.getConfigurator().apply(intakeConfigs);
-      rightIntakeFollower.setControl(new Follower(leftIntakeLeader.getDeviceID(), MotorAlignmentValue.Aligned)); //motorAlignmentValue aligned means that the follower matches the leaders directions
+     // rightIntakeFollower.getConfigurator().apply(intakeConfigs);
+      //rightIntakeFollower.setControl(new Follower(leftIntakeLeader.getDeviceID(), MotorAlignmentValue.Aligned)); //motorAlignmentValue aligned means that the follower matches the leaders directions
 
     }
     @Override
@@ -100,6 +100,7 @@ public class Intake extends SubsystemBase
             double leaderStatorCurrent = leftIntakeLeader.getStatorCurrent().getValueAsDouble();
             double leaderVoltage = leftIntakeLeader.getMotorVoltage().getValueAsDouble();
             double leaderOutput = leftIntakeLeader.get();
+            System.out.println(leaderStatorCurrent);
 
             if(leaderStatorCurrent > jamCurrentThreshold)
             {

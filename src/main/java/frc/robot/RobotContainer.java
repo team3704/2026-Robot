@@ -4,9 +4,12 @@
 
 package frc.robot;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.subsystems.Intake;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+
+import frc.robot.commands.*;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -15,6 +18,10 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
+  private final CommandXboxController logitech = new CommandXboxController(0);
+
+  private final Intake intake = new Intake();
+
   // The robot's subsystems and commands are defined here...
   // private final Swerve m_exampleSubsystem = new Swerve();
 
@@ -30,7 +37,7 @@ public class RobotContainer {
 
   private void configureBindings() 
   {
-
+        logitech.a().whileTrue(new IntakeCommands.IntakeCommand(intake));
   }
 
   /**
