@@ -20,4 +20,9 @@ public final class Constants {
     public static final double intakeSpeed = 0.8;
     public static final double coughSpeed = -0.4;
   }
+
+  public static class DriveTrainConstants {
+    public static final double MaxSpeed = 15.0;
+    public static final double MaxAngularSpeed = 15.0;
+  }
 }
