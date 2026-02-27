@@ -26,7 +26,6 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 import frc.robot.LimelightHelpers;
-import frc.robot.commands.ExampleCommand;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -39,6 +38,12 @@ public class RobotContainer {
    //private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
   // private final SwerveDrivetrainConstants diahhrea = new SwerveDrivetrainConstants();
   // private TunerConstants poop = new TunerConstants();
+
+                double kP = 0.1;
+            double kI = 0.1;
+            double kD = 0.1;
+            PIDController distancePID = new PIDController(kP, kI, kD);
+
    private double MaxSpeed = 1.0 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
@@ -113,10 +118,7 @@ public class RobotContainer {
             Math.tan(angleToGoalRadians);
             
             //double error = ShootingDistance - distance;
-            double kP = 0.1;
-            double kI = 0.1;
-            double kD = 0.1;
-            PIDController distancePID = new PIDController(kP, kI, kD);
+
             double output = distancePID.calculate(distance, ShootingDistance);
 
             output = MathUtil.clamp(output, -0.6, 0.6); //used to limit the output to a min and a max
