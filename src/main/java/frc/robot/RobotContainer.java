@@ -66,7 +66,6 @@ public class RobotContainer {
     
 
     private final Telemetry logger = new Telemetry(MaxSpeed);
-    private double ShootingDistance = 25.0;
 
     private final CommandXboxController joystick = new CommandXboxController(0);
 

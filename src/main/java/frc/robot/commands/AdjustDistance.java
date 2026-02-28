@@ -12,7 +12,6 @@ import frc.robot.LimelightHelpers;
 import frc.robot.generated.TunerConstants;
 import frc.robot.Constants.LimelightConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.Constants.LimelightConstants;
 
 public class AdjustDistance extends Command {
 
@@ -32,9 +31,9 @@ public class AdjustDistance extends Command {
 
     @Override
     public void initialize() {
-        if(!LimelightHelpers.getTV("limelight-larry")) return;
+        if(!LimelightHelpers.getTV(LimelightConstants.Name)) return;
 
-        double VerticalOffsetAngle = LimelightHelpers.getTY("limelight-larry");
+        double VerticalOffsetAngle = LimelightHelpers.getTY(LimelightConstants.Name);
 
         double AngleToGoalDegrees = LimelightConstants.LimelightAngle + VerticalOffsetAngle;
         double AngleToGoalRadians = AngleToGoalDegrees * (3.14159 / 180.0);
@@ -43,6 +42,10 @@ public class AdjustDistance extends Command {
         //Might need to add actual goal height later, instead of just the tag.
         double Distance = (LimelightConstants.TagHeight - LimelightConstants.LimelightHeight) / Math.tan(AngleToGoalRadians);
 
-        m_swerve.setControl(drive.withVelocityX(Distance));
+        double error = LimelightConstants.TargetDistance - Distance;
+        double xError = LimelightHelpers.getTX(LimelightConstants.Name);
+
+        //KpDistance is a proportional constant, no idea what it does lol but documentation says to use
+        m_swerve.setControl(drive.withVelocityX(error * LimelightConstants.KpDistance));
     }
 }
