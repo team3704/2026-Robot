@@ -36,7 +36,7 @@ public class AdjustDistance extends Command {
         double VerticalOffsetAngle = LimelightHelpers.getTY(LimelightConstants.Name);
 
         double AngleToGoalDegrees = LimelightConstants.LimelightAngle + VerticalOffsetAngle;
-        double AngleToGoalRadians = AngleToGoalDegrees * (3.14159 / 180.0);
+        double AngleToGoalRadians = AngleToGoalDegrees * (Math.PI / 180.0);
 
         //calculate distance
         //Might need to add actual goal height later, instead of just the tag.

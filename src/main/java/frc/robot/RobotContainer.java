@@ -4,7 +4,7 @@
 
 package frc.robot;
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.*;
 
 import static edu.wpi.first.units.Units.*;
 
@@ -21,7 +21,10 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+
+import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.hardware.*;
 
 import frc.robot.generated.TunerConstants;
@@ -64,10 +67,11 @@ public class RobotContainer {
 
     private final TalonFX hi = new TalonFX(0);
     
+    private final Shooter m_shooter = new Shooter();
 
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
-    private final CommandXboxController joystick = new CommandXboxController(0);
+    private final CommandXboxController m_joystick = new CommandXboxController(0);
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
@@ -79,7 +83,19 @@ public class RobotContainer {
 
   private void configureBindings() 
   {
-        logitech.a().whileTrue(new IntakeCommands.IntakeCommand(intake));
+    m_joystick.leftBumper().onTrue(Commands.runOnce(SignalLogger::start));
+m_joystick.rightBumper().onTrue(Commands.runOnce(SignalLogger::stop));
+
+/*
+ * Joystick Y = quasistatic forward
+ * Joystick A = quasistatic reverse
+ * Joystick B = dynamic forward
+ * Joystick X = dyanmic reverse
+ */
+m_joystick.y().whileTrue(m_shooter.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+m_joystick.a().whileTrue(m_shooter.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+m_joystick.b().whileTrue(m_shooter.sysIdDynamic(SysIdRoutine.Direction.kForward));
+m_joystick.x().whileTrue(m_shooter.sysIdDynamic(SysIdRoutine.Direction.kReverse));
   }
 
   /**
