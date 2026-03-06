@@ -3,6 +3,8 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot;
+import frc.robot.Constants.OperatorConstants;
+import frc.robot.subsystems.*;
 
 import static edu.wpi.first.units.Units.*;
 
@@ -19,13 +21,18 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+
+import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.hardware.*;
 
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 import frc.robot.LimelightHelpers;
+
+import frc.robot.commands.*;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -34,6 +41,10 @@ import frc.robot.LimelightHelpers;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
+  private final CommandXboxController logitech = new CommandXboxController(0);
+
+  private final Intake intake = new Intake();
+
   // The robot's subsystems and commands are defined here...
    //private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
   // private final SwerveDrivetrainConstants diahhrea = new SwerveDrivetrainConstants();
@@ -56,11 +67,11 @@ public class RobotContainer {
 
     private final TalonFX hi = new TalonFX(0);
     
+    private final Shooter m_shooter = new Shooter();
 
     private final Telemetry logger = new Telemetry(MaxSpeed);
-    private double ShootingDistance = 25.0;
 
-    private final CommandXboxController joystick = new CommandXboxController(0);
+    private final CommandXboxController m_joystick = new CommandXboxController(0);
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
@@ -70,122 +81,21 @@ public class RobotContainer {
     configureBindings();
   }
 
-      public SwerveRequest.RobotCentric yeah() {
-                    drive.withVelocityX(joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
-                    .withVelocityY(joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-                    .withRotationalRate(-joystick.getRightX() * MaxAngularRate); // Drive counterclockwise with negative X (left)
+  private void configureBindings() 
+  {
+    m_joystick.leftBumper().onTrue(Commands.runOnce(SignalLogger::start));
+m_joystick.rightBumper().onTrue(Commands.runOnce(SignalLogger::stop));
 
-                    //hi.set(0.67);
-                    //System.out.println(drivetrain.getModules().);
-                    double TotalVoltage = 0.0;
-                    for(SwerveModule<TalonFX, TalonFX, CANcoder> dude : drivetrain.getModules()) {
-                      if(!dude.getClass().equals(CANcoder.class)) {
-                        dude.getDriveMotor().getMotorVoltage().refresh();
-                        TotalVoltage += Math.abs(dude.getDriveMotor().getMotorVoltage().getValueAsDouble());
-
-                        dude.getSteerMotor().getMotorVoltage().refresh();
-                        TotalVoltage += Math.abs(dude.getSteerMotor().getMotorVoltage().getValueAsDouble());
-                      }
-                    }
-
-                    System.out.println(TotalVoltage);
-
-                    if(LimelightHelpers.getTV("limelight-larry")) {
-                         double targetOffsetAngle_Vertical = LimelightHelpers.getTY("limelight-larry");
-
-        //hell yeah copy and pasted documentation code
-          
-
-        // how many degrees back is your limelight rotated from perfectly vertical?
-        double limelightMountAngleDegrees = 25.0; //assumed
-
-        // distance from the center of the Limelight lens to the floor
-        double limelightLensHeightInches = 0.0; //assumed
-
-        // distance from the target to the floor
-        double goalHeightInches = 11.0;
-        //72 inches off ground (thing, not april tag)
-        //the april tag is 44.25 inches off the ground
-        //...is adjusting needed?
-
-        double angleToGoalDegrees =
-            limelightMountAngleDegrees + targetOffsetAngle_Vertical;
-        double angleToGoalRadians = angleToGoalDegrees * (Math.PI / 180.0);
-
-        //calculate distance
-        double distance =
-            (goalHeightInches - limelightLensHeightInches) /
-            Math.tan(angleToGoalRadians);
-            
-            //double error = ShootingDistance - distance;
-
-            double output = distancePID.calculate(distance, ShootingDistance);
-
-            output = MathUtil.clamp(output, -0.6, 0.6); //used to limit the output to a min and a max
-
-            //drive.withVelocityX((ShootingDistance - distance) * .1 * MaxSpeed);
-            drive.withVelocityX(output);
-
-            System.out.println(distance);
-
-                    }
-
-                    
-                    return drive;
-        
-    }
-
-  /**
-   * Use this method to define your trigger->command mappings. Triggers can be created via the
-   * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with an arbitrary
-   * predicate, or via the named factories in {@link
-   * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for {@link
-   * CommandXboxController Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
-   * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
-   * joysticks}.
-   */
-  private void configureBindings() {
-    // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
-    // new Trigger(m_exampleSubsystem::exampleCondition)
-    //     .onTrue(new AdjustDistance(m_exampleSubsystem));
-
-    // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
-    // cancelling on release.
-    drivetrain.setDefaultCommand(
-            
-            // Drivetrain will execute this command periodically
-            drivetrain.applyRequest(() -> 
-                
-                yeah()
-            )
-            
-        );
-
-        // Idle while the robot is disabled. This ensures the configured
-        // neutral mode is applied to the drive motors while disabled.
-        final var idle = new SwerveRequest.Idle();
-        RobotModeTriggers.disabled().whileTrue(
-            drivetrain.applyRequest(() -> idle).ignoringDisable(true)
-        );
-
-        joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
-
-        joystick.b().whileTrue(drivetrain.applyRequest(() ->
-            point.withModuleDirection(new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))
-        ));
-
-        // Run SysId routines when holding back/start and X/Y.
-        // Note that each routine should be run exactly once in a single log.
-        
-        joystick.back().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-        joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-        joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-        joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
-
-        // Reset the field-centric heading on left bumper press.
-        joystick.leftBumper().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
-
-        drivetrain.registerTelemetry(logger::telemeterize);
+/*
+ * Joystick Y = quasistatic forward
+ * Joystick A = quasistatic reverse
+ * Joystick B = dynamic forward
+ * Joystick X = dyanmic reverse
+ */
+m_joystick.y().whileTrue(m_shooter.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+m_joystick.a().whileTrue(m_shooter.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+m_joystick.b().whileTrue(m_shooter.sysIdDynamic(SysIdRoutine.Direction.kForward));
+m_joystick.x().whileTrue(m_shooter.sysIdDynamic(SysIdRoutine.Direction.kReverse));
   }
 
   /**
@@ -193,24 +103,9 @@ public class RobotContainer {
    *
    * @return the command to run in autonomous
    */
-  public Command getAutonomousCommand() {
+  public Command getAutonomousCommand() 
+  {
     // An example command will be run in autonomous
-    // return Autos.exampleAuto(m_exampleSubsystem);
-    //return new  (vroom);
-    final var idle = new SwerveRequest.Idle();
-        return Commands.sequence(
-            // Reset our field centric heading to match the robot
-            // facing away from our alliance station wall (0 deg).
-            drivetrain.runOnce(() -> drivetrain.seedFieldCentric(Rotation2d.kZero)),
-            // Then slowly drive forward (away from us) for 5 seconds.
-            drivetrain.applyRequest(() ->
-                drive.withVelocityX(0.5)
-                    .withVelocityY(0)
-                    .withRotationalRate(0)
-            )
-            .withTimeout(5.0),
-            // Finally idle for the rest of auton
-            drivetrain.applyRequest(() -> idle)
-        );
+    return null;
   }
 }

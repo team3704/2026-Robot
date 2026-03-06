@@ -25,4 +25,16 @@ public final class Constants {
     public static final double MaxSpeed = 15.0;
     public static final double MaxAngularSpeed = 15.0;
   }
+
+  public static class LimelightConstants {
+    public static final double TagHeight = 41.0;
+    public static final double LimelightAngle = 15.0;
+    public static final double TargetDistance = 24.0;
+    public static final String Name = "limelight-larry";
+
+    //Limelight lens height from floor
+    public static final double LimelightHeight = 10.0;
+
+    public static final double KpDistance = -0.1;
+  }
 }
