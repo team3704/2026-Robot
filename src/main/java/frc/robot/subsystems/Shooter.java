@@ -2,6 +2,8 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Volts;
 
+import frc.robot.Constants;
+import frc.robot.Constants.SubsystemConstants;
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -33,9 +35,6 @@ public class Shooter extends SubsystemBase {
 
     private final TalonFXConfiguration leftShooterConfigs = new TalonFXConfiguration();
     private final TalonFXConfiguration rightShooterConfigs = new TalonFXConfiguration();
-
-
-    public double Speed = 6.0;
 
     public Shooter() {
 
@@ -75,8 +74,8 @@ public class Shooter extends SubsystemBase {
 
     public void Start() {
         // leftShooterLeader.setControl(torqueveldude.withOutput(Speed));
-        leftShooter.set(Lpiddy.calculate(Speed));
-        rightShooter.set(Rpiddy.calculate(Speed));
+        leftShooter.set(Lpiddy.calculate(SubsystemConstants.ShooterSpeed));
+        rightShooter.set(Rpiddy.calculate(SubsystemConstants.ShooterSpeed));
 
     }
 

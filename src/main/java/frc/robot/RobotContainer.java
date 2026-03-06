@@ -16,9 +16,11 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -50,7 +52,7 @@ public class RobotContainer {
   // private final SwerveDrivetrainConstants diahhrea = new SwerveDrivetrainConstants();
   // private TunerConstants poop = new TunerConstants();
 
-                double kP = 0.1;
+            double kP = 0.1;
             double kI = 0.1;
             double kD = 0.1;
             PIDController distancePID = new PIDController(kP, kI, kD);
@@ -64,11 +66,26 @@ public class RobotContainer {
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
-
-    private final TalonFX hi = new TalonFX(0);
     
     private final Shooter m_shooter = new Shooter();
+    private final Climber m_climber = new Climber();
 
+    private final Joystick supportController = new Joystick(0);
+
+    private final Trigger supportUpTrigger = new Trigger(() -> supportController.getRawAxis(1) > .5);
+    private final Trigger supportDownTrigger = new Trigger(() -> supportController.getRawAxis(1) < .5);
+
+    //intake
+    private final JoystickButton ourpleButton = new JoystickButton(supportController, 1);
+
+    //shoot
+    private final JoystickButton redButton = new JoystickButton(supportController, 2);
+
+    //puke
+    private final JoystickButton oinkButton = new JoystickButton(supportController, 3);
+
+    //adjust
+    private final JoystickButton limeButton = new JoystickButton(supportController, 4);
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
     private final CommandXboxController m_joystick = new CommandXboxController(0);
@@ -85,7 +102,7 @@ public class RobotContainer {
   {
     m_joystick.leftBumper().onTrue(Commands.runOnce(SignalLogger::start));
 m_joystick.rightBumper().onTrue(Commands.runOnce(SignalLogger::stop));
-
+   
 /*
  * Joystick Y = quasistatic forward
  * Joystick A = quasistatic reverse

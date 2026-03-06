@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class Climber extends SubsystemBase {
 
     private final TalonFX climbMotor;
-    public final double Speed = 2.0;
+    public final double Speed = .4;
 
     public Climber() {
         climbMotor = new TalonFX(67);

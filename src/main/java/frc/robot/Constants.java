@@ -37,4 +37,11 @@ public final class Constants {
 
     public static final double KpDistance = -0.1;
   }
+
+  public static class SubsystemConstants {
+    public static final double ClimberSpeed = .5;
+    public static final double ShooterSpeed = 6.0;
+    public static final double DriveSpeed = 6.7;
+    
+  }
 }
