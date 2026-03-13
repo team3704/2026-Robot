@@ -27,7 +27,8 @@ public final class Constants {
   }
 
   public static class LimelightConstants {
-    public static final double TagHeight = 41.0;
+    public static final double TagHeight = 44.25;
+    public static final double TargetHeight = 72.0;
     public static final double LimelightAngle = 15.0;
     public static final double TargetDistance = 24.0;
     public static final String Name = "limelight-larry";
@@ -40,7 +41,7 @@ public final class Constants {
 
   public static class SubsystemConstants {
     public static final double ClimberSpeed = .5;
-    public static final double ShooterSpeed = 6.0;
+    public static final double ShooterSpeed = 0.7;
     public static final double DriveSpeed = 6.7;
     
   }

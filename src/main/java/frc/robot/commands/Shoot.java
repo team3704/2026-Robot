@@ -23,7 +23,8 @@ public class Shoot extends Command {
         m_shoot.Start();
     }
 
-    public void end() {
+    @Override
+    public void end(boolean interrupted) {
         m_shoot.Stop();
     }
 

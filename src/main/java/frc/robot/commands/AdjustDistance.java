@@ -8,6 +8,7 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Helpers;
 import frc.robot.LimelightHelpers;
 import frc.robot.generated.TunerConstants;
 import frc.robot.Constants.LimelightConstants;
@@ -40,7 +41,8 @@ public class AdjustDistance extends Command {
 
         //calculate distance
         //Might need to add actual goal height later, instead of just the tag.
-        double Distance = (LimelightConstants.TagHeight - LimelightConstants.LimelightHeight) / Math.tan(AngleToGoalRadians);
+        double totalHeight = ((LimelightConstants.TagHeight - LimelightConstants.LimelightHeight + (LimelightConstants.TargetHeight - LimelightConstants.TagHeight)) / Math.tan(AngleToGoalRadians));
+        double Distance = Helpers.CalculateDistance(totalHeight, AngleToGoalRadians) + 23.5;
 
         double error = LimelightConstants.TargetDistance - Distance;
         double xError = LimelightHelpers.getTX(LimelightConstants.Name);

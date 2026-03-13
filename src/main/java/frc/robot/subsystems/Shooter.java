@@ -27,16 +27,19 @@ public class Shooter extends SubsystemBase {
     private final TalonFX rightShooter;
 
     private final VoltageOut m_voltReq = new VoltageOut(0.0);
+    
+    private final SysIdRoutine m_sysIdRoutine;
 
     private PIDController Lpiddy = new PIDController(0, 0, 0);
     private PIDController Rpiddy = new PIDController(0, 0, 0);
  
-    private final SysIdRoutine m_sysIdRoutine;
+    //private final SysIdRoutine m_sysIdRoutine;
 
     private final TalonFXConfiguration leftShooterConfigs = new TalonFXConfiguration();
     private final TalonFXConfiguration rightShooterConfigs = new TalonFXConfiguration();
 
     public Shooter() {
+
 
         leftShooterConfigs.MotorOutput.NeutralMode = NeutralModeValue.Coast;
         rightShooterConfigs.MotorOutput.NeutralMode = NeutralModeValue.Coast;
@@ -44,24 +47,24 @@ public class Shooter extends SubsystemBase {
         leftShooterConfigs.OpenLoopRamps.DutyCycleOpenLoopRampPeriod = 0.5;
         rightShooterConfigs.OpenLoopRamps.DutyCycleOpenLoopRampPeriod = 0.5;
 
-        leftShooter = new TalonFX(41);
-        rightShooter = new TalonFX(1);
+        leftShooter = new TalonFX(6);
+        rightShooter = new TalonFX(7);
 
-        m_sysIdRoutine =
-   new SysIdRoutine(
+m_sysIdRoutine = new SysIdRoutine(
       new SysIdRoutine.Config(
          null,        // Use default ramp rate (1 V/s)
-         Volts.of(8), // Reduce dynamic step voltage to 4 to prevent brownout
+         Volts.of(36), // Reduce dynamic step voltage to 4 to prevent brownout
          null,        // Use default timeout (10 s)
                       // Log state with Phoenix SignalLogger class
          (state) -> SignalLogger.writeString("state: Shooter", state.toString())
       ),
       new SysIdRoutine.Mechanism(
-         (volts) -> leftShooter.setControl(m_voltReq.withOutput(volts.in(Volts))),
+         (volts) -> leftShooter.setControl(m_voltReq.withOutput(volts.in(Volts.of(12.0).unit()))),
          null,
          this
       )
    );
+
 
         // var configs = new Slot0Configs();
         // configs.kS = 2.5; // To account for friction, add 2.5 A of static feedforward
@@ -74,8 +77,8 @@ public class Shooter extends SubsystemBase {
 
     public void Start() {
         // leftShooterLeader.setControl(torqueveldude.withOutput(Speed));
-        leftShooter.set(Lpiddy.calculate(SubsystemConstants.ShooterSpeed));
-        rightShooter.set(Rpiddy.calculate(SubsystemConstants.ShooterSpeed));
+        leftShooter.set(SubsystemConstants.ShooterSpeed);
+        rightShooter.set(-SubsystemConstants.ShooterSpeed);
 
     }
 
