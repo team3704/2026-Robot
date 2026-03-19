@@ -16,7 +16,7 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 public class AdjustDistance extends Command {
 
-    private double MaxSpeed = 1.0 * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
+    private double MaxSpeed = 1.0;// * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
     private final CommandSwerveDrivetrain m_swerve;
@@ -41,7 +41,7 @@ public class AdjustDistance extends Command {
 
         //calculate distance
         //Might need to add actual goal height later, instead of just the tag.
-        double totalHeight = ((LimelightConstants.TagHeight - LimelightConstants.LimelightHeight + (LimelightConstants.TargetHeight - LimelightConstants.TagHeight)) / Math.tan(AngleToGoalRadians));
+        double totalHeight = LimelightConstants.TagHeight - LimelightConstants.LimelightHeight ;
         double Distance = Helpers.CalculateDistance(totalHeight, AngleToGoalRadians) + 23.5;
 
         double error = LimelightConstants.TargetDistance - Distance;

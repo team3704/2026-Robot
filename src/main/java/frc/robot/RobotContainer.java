@@ -9,6 +9,8 @@ import frc.robot.commands.*;
 
 import static edu.wpi.first.units.Units.*;
 
+import java.util.concurrent.CompletableFuture;
+
 import com.ctre.phoenix6.swerve.SwerveModule;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveRequest.FieldCentric;
@@ -47,6 +49,59 @@ public class RobotContainer {
   private final CommandXboxController logitech = new CommandXboxController(0);
 
   private final Intake intake = new Intake();
+  private enum side {
+    LEFT,
+    MIDDLE,
+    RIGHT
+  }
+
+  public Command Move(double x, double y) {
+    return drivetrain.applyRequest(() -> drive.withVelocityX(x).withVelocityY(y));
+  }
+
+  public double x = 0;
+  public double y = 0;
+
+  private class AutoCommand extends Command {
+    public AutoCommand(side Side) {
+    CompletableFuture<String> future = CompletableFuture.supplyAsync( () -> {
+      switch(Side) {
+      case LEFT: {
+        TimedMove(-0.2, 0.0, 1000);
+        TimedMove(0.2, 0.0, 1000);
+        TimedMove(0.0, 0.2, 1000);
+        TimedMove(0.0, -0.2, 1000);
+      }
+      case MIDDLE: {
+        TimedMove(-1.0, 1.0, 1500);
+        TimedMove(-1.0, 1.0, 1500);
+      }
+      case RIGHT: {
+        TimedMove(-1.0, 1.0, 1500);
+        TimedMove(-1.0, 1.0, 1500);
+      }
+    }
+      return "";
+    });
+    }
+  }
+
+  private boolean TimedMove(double x, double y, int time) {
+    this.x = x;
+    this.y = y;
+    try {
+      Thread.sleep(time);
+    } catch(InterruptedException e) {
+      this.x = 0;
+      this.y = 0;
+      Thread.currentThread().interrupt();
+      return false;
+    }
+
+    return true;
+  }
+
+  private side Side = side.LEFT;
 
   // The robot's subsystems and commands are defined here...
    //private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
@@ -72,10 +127,10 @@ public class RobotContainer {
     private final Shooter m_shooter = new Shooter();
     private final Climber m_climber = new Climber();
 
-    private final Joystick supportController = new Joystick(0);
+    private final Joystick supportController = new Joystick(1);
 
     private final Trigger supportUpTrigger = new Trigger(() -> supportController.getRawAxis(1) > .5);
-    private final Trigger supportDownTrigger = new Trigger(() -> supportController.getRawAxis(1) < .5);
+    private final Trigger supportDownTrigger = new Trigger(() -> supportController.getRawAxis(1) < -.5);
 
     private final IntakeCommands intakeCommands = new IntakeCommands();
 
@@ -97,7 +152,6 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-        for(var i = 1; i <= 20; i++) {System.out.println("THE OLD MAX VALUE IS " + OldMax + " " + MaxAngularRate);}
     // Configure the trigger bindings
     configureBindings();
   }
@@ -109,8 +163,8 @@ public class RobotContainer {
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() ->
-                drive.withVelocityX(-m_joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
-                    .withVelocityY(-m_joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+                drive.withVelocityX(-m_joystick.getLeftY()) // Drive forward with negative Y (forward)
+                    .withVelocityY(-m_joystick.getLeftX()) // Drive left with negative X (left)
                     .withRotationalRate(-m_joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
             )
         );
@@ -147,7 +201,7 @@ m_joystick.x().whileTrue(m_shooter.sysIdDynamic(SysIdRoutine.Direction.kReverse)
    */
   public Command getAutonomousCommand() 
   {
-    // An example command will be run in autonomous
-    return null;
-  }
+      return new AutoCommand(this.Side);
+    }
+
 }

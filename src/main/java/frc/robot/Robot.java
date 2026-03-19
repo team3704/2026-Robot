@@ -6,10 +6,12 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants.LimelightConstants;
 import frc.robot.subsystems.*;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.util.sendable.SendableRegistry;
 import edu.wpi.first.wpilibj.Joystick;
 
@@ -24,13 +26,7 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
   private final RobotContainer m_robotContainer;
-  
-  private final DifferentialDrive m_robotDrive;
-  private final Joystick m_leftStick;
-  private final Joystick m_rightStick;
-
-  private final PWMSparkMax m_leftMotor = new PWMSparkMax(0);
-  private final PWMSparkMax m_rightMotor = new PWMSparkMax(1);
+ 
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -40,14 +36,7 @@ public class Robot extends TimedRobot {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
-    m_rightMotor.setInverted(true);
 
-    m_robotDrive = new DifferentialDrive(m_leftMotor::set, m_rightMotor::set);
-    m_leftStick = new Joystick(0);
-    m_rightStick = new Joystick(1);
-
-    SendableRegistry.addChild(m_robotDrive, m_leftMotor);
-    SendableRegistry.addChild(m_robotDrive, m_rightMotor);
   }
 
   /**
@@ -59,11 +48,24 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
+        if(LimelightHelpers.getTV(LimelightConstants.Name)) {
+        double VerticalOffsetAngle = LimelightHelpers.getTY(LimelightConstants.Name);
+
+        double AngleToGoalDegrees = LimelightConstants.LimelightAngle + VerticalOffsetAngle;
+        double AngleToGoalRadians = AngleToGoalDegrees * (Math.PI / 180.0);
+
+        //calculate distance
+        //Might need to add actual goal height later, instead of just the tag.
+        double totalHeight = LimelightConstants.TagHeight - LimelightConstants.LimelightHeight; 
+        double Distance = Helpers.CalculateDistance(totalHeight, AngleToGoalRadians) + 23.5;
     // Runs the Scheduler.  This is responsible for polling buttons, adding newly-scheduled
     // commands, running already-scheduled commands, removing finished or interrupted commands,
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
     // block in order for anything in the Command-based framework to work.
-    m_robotDrive.tankDrive(-m_leftStick.getY(), -m_rightStick.getY());
+    SmartDashboard.putNumber("dist", Distance /12);
+        }
+
+
     CommandScheduler.getInstance().run();
   }
 
@@ -88,8 +90,7 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {
-    
-  }
+    m_robotContainer.Move(m_robotContainer.x, m_robotContainer.y).schedule();  }
 
   @Override
   public void teleopInit() {

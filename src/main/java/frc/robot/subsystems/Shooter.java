@@ -49,6 +49,8 @@ public class Shooter extends SubsystemBase {
 
         leftShooter = new TalonFX(6);
         rightShooter = new TalonFX(7);
+        leftShooter.getConfigurator().apply(leftShooterConfigs);
+        rightShooter.getConfigurator().apply(rightShooterConfigs);
 
 m_sysIdRoutine = new SysIdRoutine(
       new SysIdRoutine.Config(

@@ -29,12 +29,12 @@ public final class Constants {
   public static class LimelightConstants {
     public static final double TagHeight = 44.25;
     public static final double TargetHeight = 72.0;
-    public static final double LimelightAngle = 15.0;
-    public static final double TargetDistance = 24.0;
+    public static final double LimelightAngle = -2.5;
+    public static final double TargetDistance = 121.0;
     public static final String Name = "limelight-larry";
 
     //Limelight lens height from floor
-    public static final double LimelightHeight = 10.0;
+    public static final double LimelightHeight = 19.5;
 
     public static final double KpDistance = -0.1;
   }
