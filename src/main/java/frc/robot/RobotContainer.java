@@ -68,23 +68,16 @@ public class RobotContainer {
   public double x = 0;
   public double y = 0;
 
-  private void AutoMove() {
+  private void AutoMove(int y_mul) {
 
     //1.57 seconds to travel 5 feet (60 inches)
+    //we travel at 38.21 inches per second.
     switch(this.Side) {
-      case LEFT: {
-        TimedMove(-0.67, 0.0, 10000);
-        TimedMove(0.67, 0.0, 10000);
-        TimedMove(0.0, 0.3, 3000);
-        TimedMove(0.0, -0.3, 3000);
+      default: {
+        TimedMove(-0.67, 0, 4370);
         break;
       }
       case MIDDLE: {
-        TimedMove(-1.0, 1.0, 1500);
-        TimedMove(-1.0, 1.0, 1500);
-        break;
-      }
-      case RIGHT: {
         TimedMove(-1.0, 1.0, 1500);
         TimedMove(-1.0, 1.0, 1500);
         break;
@@ -99,7 +92,7 @@ public class RobotContainer {
     CompletableFuture<String> future = CompletableFuture.supplyAsync( () -> {
       switch(Side) {
       case LEFT: {
-        AutoMove();
+        AutoMove(1);
         break;
       }
       case MIDDLE: {
@@ -122,7 +115,7 @@ public class RobotContainer {
         break;
             }
       case RIGHT: {
-        AutoMove();
+        AutoMove(-1);
         break;
       }
     }
@@ -161,7 +154,7 @@ public class RobotContainer {
 
             private double OldMax = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
    private double MaxSpeed = 1.0;// * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
-    private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
+    private double MaxAngularRate = RotationsPerSecond.of(0.35).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -228,19 +221,12 @@ public class RobotContainer {
 
     supportUpTrigger.whileTrue(new ClimberCommands.ClimbUp(m_climber));
     supportDownTrigger.whileTrue(new ClimberCommands.ClimbDown(m_climber));
-
-    m_joystick.leftBumper().onTrue(Commands.runOnce(SignalLogger::start));
-m_joystick.rightBumper().onTrue(Commands.runOnce(SignalLogger::stop));
 /*
  * Joystick Y = quasistatic forward
  * Joystick A = quasistatic reverse
  * Joystick B = dynamic forward
  * Joystick X = dyanmic reverse
  */
-m_joystick.y().whileTrue(m_shooter.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-m_joystick.a().whileTrue(m_shooter.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-m_joystick.b().whileTrue(m_shooter.sysIdDynamic(SysIdRoutine.Direction.kForward));
-m_joystick.x().whileTrue(m_shooter.sysIdDynamic(SysIdRoutine.Direction.kReverse));
   }
 
   /**
