@@ -3,6 +3,7 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot;
+import frc.robot.Constants.LimelightConstants;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.*;
 import frc.robot.commands.*;
@@ -52,8 +53,13 @@ public class RobotContainer {
   private enum side {
     LEFT,
     MIDDLE,
-    RIGHT
+    RIGHT,
   }
+
+  public double limelightDistance;
+
+  private final boolean DoMove = true;
+  private final boolean DoAuto = true;
 
   public Command Move(double x, double y) {
     return drivetrain.applyRequest(() -> drive.withVelocityX(x).withVelocityY(y));
@@ -62,33 +68,73 @@ public class RobotContainer {
   public double x = 0;
   public double y = 0;
 
-  private class AutoCommand extends Command {
-    public AutoCommand(side Side) {
-    CompletableFuture<String> future = CompletableFuture.supplyAsync( () -> {
-      switch(Side) {
+  private void AutoMove() {
+
+    //1.57 seconds to travel 5 feet (60 inches)
+    switch(this.Side) {
       case LEFT: {
         TimedMove(-0.67, 0.0, 10000);
         TimedMove(0.67, 0.0, 10000);
         TimedMove(0.0, 0.3, 3000);
         TimedMove(0.0, -0.3, 3000);
+        break;
       }
       case MIDDLE: {
         TimedMove(-1.0, 1.0, 1500);
         TimedMove(-1.0, 1.0, 1500);
+        break;
       }
       case RIGHT: {
         TimedMove(-1.0, 1.0, 1500);
         TimedMove(-1.0, 1.0, 1500);
+        break;
+      }
+
+    }
+  }
+
+  private class AutoCommand extends Command {
+    public AutoCommand(side Side) {
+    if(!DoAuto) return;
+    CompletableFuture<String> future = CompletableFuture.supplyAsync( () -> {
+      switch(Side) {
+      case LEFT: {
+        AutoMove();
+        break;
+      }
+      case MIDDLE: {
+        while(Math.abs(limelightDistance - LimelightConstants.TargetDistance) > 5) {
+          new AdjustDistance(drivetrain).schedule();
+        }
+
+        m_shooter.Start();
+        //DOES THIS NEED TO BE CONTINOULY SET??? IDK............
+
+        try {
+            Thread.sleep(10000);
+            m_shooter.Stop();
+        } catch(InterruptedException e) {
+          m_shooter.Stop();
+          Thread.currentThread().interrupt();
+        }
+
+
+        break;
+            }
+      case RIGHT: {
+        AutoMove();
+        break;
       }
     }
       return "";
     });
-    }
+  }
   }
 
   private boolean TimedMove(double x, double y, int time) {
     this.x = x;
     this.y = y;
+
     try {
       Thread.sleep(time);
     } catch(InterruptedException e) {
@@ -174,6 +220,9 @@ public class RobotContainer {
 
     redButton.whileTrue(new Shoot(m_shooter));
     ourpleButton.whileTrue(new IntakeCommands.IntakeCommand(intake));
+    oinkButton.whileTrue(new IntakeCommands.UpDeploy(intake));
+    oinkButton.whileFalse(new IntakeCommands.DownDeploy(intake));
+
     oinkButton.whileTrue(new IntakeCommands.EjectCommand(intake));
     limeButton.whileTrue(new AdjustDistance(drivetrain));
 

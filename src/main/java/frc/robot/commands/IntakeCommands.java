@@ -55,5 +55,50 @@ public class IntakeCommands
 
     }
 
+    public static class UpDeploy extends Command {
+        private final Intake m_intake;
+        public UpDeploy(Intake subsystem) {
+            m_intake = subsystem;
+            addRequirements(m_intake);
+        }
 
+        @Override
+        public void execute() {
+            m_intake.deployUp();
+        }
+
+        @Override
+        public void end(boolean interrupted) {
+
+        }
+
+        @Override
+        public boolean isFinished() {
+            return false;
+        }
+    }
+
+    
+    public static class DownDeploy extends Command {
+        private final Intake m_intake;
+        public DownDeploy(Intake subsystem) {
+            m_intake = subsystem;
+            addRequirements(m_intake);
+        }
+
+        @Override
+        public void execute() {
+            m_intake.deployDown();
+        }
+
+        @Override
+        public void end(boolean interrupted) {
+
+        }
+
+        @Override
+        public boolean isFinished() {
+            return false;
+        }
+    }
 }

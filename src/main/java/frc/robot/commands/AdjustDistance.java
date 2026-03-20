@@ -42,7 +42,7 @@ public class AdjustDistance extends Command {
         //calculate distance
         //Might need to add actual goal height later, instead of just the tag.
         double totalHeight = LimelightConstants.TagHeight - LimelightConstants.LimelightHeight ;
-        double Distance = Helpers.CalculateDistance(totalHeight, AngleToGoalRadians) + 23.5;
+        double Distance = Helpers.CalculateDistance(totalHeight, AngleToGoalRadians);
 
         double error = LimelightConstants.TargetDistance - Distance;
         double xError = LimelightHelpers.getTX(LimelightConstants.Name);

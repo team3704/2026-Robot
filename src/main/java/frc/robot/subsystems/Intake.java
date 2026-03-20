@@ -10,15 +10,18 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Timer;
 
 public class Intake extends SubsystemBase
 {
     private final TalonFX leftIntakeLeader;
+    private final TalonFX deployIntake;
+
    // private final TalonFX rightIntakeFollower;
     private final TalonFXConfiguration intakeConfigs = new TalonFXConfiguration();
-
+    private final TalonFXConfiguration intakeDeploymentConfigs = new TalonFXConfiguration();
+    
     private IntakeState currentState = IntakeState.IDLE;
 
     private final DutyCycleOut dutyCycleRequest = new DutyCycleOut(0); 
@@ -29,16 +32,20 @@ public class Intake extends SubsystemBase
     private final double jamCurrentThreshold = 45.0;
     private final int jamDetectionCountCycles = 50; //stator current is "noisy" when motor starts, current spikes so the code might think there is a jam when motor begins
     private final double jamVoltageThreshold = 2.0;
+
+    public boolean atLimit = false;
     
     private int jamCount;
 
     private final double intakeSpeed = 1;
     private final double ejectSpeed = -0.8;
     private final double holdingSpeed = 0.10;
+    private final double deploySpeed = 0.1;
 
     private final Timer recoveryTimer = new Timer();
-    private final double recoveryTimerSeconds = 0.75; 
-
+    private final double recoveryTimerSeconds = 0.75;
+    
+    private final DigitalInput m_limit;
 
     public enum IntakeState{
         IDLE,
@@ -56,11 +63,14 @@ public class Intake extends SubsystemBase
      */
     public Intake()
     {
+        m_limit = new DigitalInput(0);
       leftIntakeLeader = new TalonFX(39);
-      //rightIntakeFollower = new TalonFX(16);
+      deployIntake = new TalonFX(45);
 
       intakeConfigs.MotorOutput.NeutralMode = NeutralModeValue.Coast;
       intakeConfigs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+
+      intakeDeploymentConfigs.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     
       //Current limits to protect motor and battery
       intakeConfigs.CurrentLimits.StatorCurrentLimit = intakeStatorCurrentLimitValue; // In amps, limits the current circulating in the motor, sets a punch to getr game piece but not enough to melt internal insulation
@@ -71,9 +81,11 @@ public class Intake extends SubsystemBase
       //Ramping mechanism
       intakeConfigs.OpenLoopRamps.DutyCycleOpenLoopRampPeriod = 0.5; //0.5 secs to reach 0% to 100% output
 
+      intakeDeploymentConfigs.OpenLoopRamps.DutyCycleOpenLoopRampPeriod = 0.1;
+
       //Apply the leftConfigs into the leftIntakeLeader motor
       leftIntakeLeader.getConfigurator().apply(intakeConfigs);
-
+      deployIntake.getConfigurator().apply(intakeDeploymentConfigs);
       //You might need to change the direction of the follower motor, if so
       //leftConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Negative;
      // rightIntakeFollower.getConfigurator().apply(intakeConfigs);
@@ -228,6 +240,18 @@ public class Intake extends SubsystemBase
     public double getLeaderCurrent()
     {
         return leftIntakeLeader.getStatorCurrent().getValueAsDouble();
+    }
+
+    public void deployUp() {
+        deployIntake.set(.3);
+    }
+
+    public void deployDown() {
+        if(m_limit.get()) { 
+            deployIntake.stopMotor();
+            return;
+        }
+        deployIntake.set(-.075);
     }
 
 }
