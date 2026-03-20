@@ -57,12 +57,12 @@ public class Robot extends TimedRobot {
         //calculate distance
         //Might need to add actual goal height later, instead of just the tag.
         double totalHeight = LimelightConstants.TagHeight - LimelightConstants.LimelightHeight; 
-        double Distance = Helpers.CalculateDistance(totalHeight, AngleToGoalRadians) + 23.5;
+        double Distance = Helpers.CalculateDistance(totalHeight, AngleToGoalRadians);// + 23.5;
     // Runs the Scheduler.  This is responsible for polling buttons, adding newly-scheduled
     // commands, running already-scheduled commands, removing finished or interrupted commands,
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
     // block in order for anything in the Command-based framework to work.
-    SmartDashboard.putNumber("dist", Distance /12);
+    SmartDashboard.putNumber("dist", Distance);
         }
 
 

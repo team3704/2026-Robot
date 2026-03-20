@@ -67,10 +67,10 @@ public class RobotContainer {
     CompletableFuture<String> future = CompletableFuture.supplyAsync( () -> {
       switch(Side) {
       case LEFT: {
-        TimedMove(-0.2, 0.0, 1000);
-        TimedMove(0.2, 0.0, 1000);
-        TimedMove(0.0, 0.2, 1000);
-        TimedMove(0.0, -0.2, 1000);
+        TimedMove(-0.67, 0.0, 10000);
+        TimedMove(0.67, 0.0, 10000);
+        TimedMove(0.0, 0.3, 3000);
+        TimedMove(0.0, -0.3, 3000);
       }
       case MIDDLE: {
         TimedMove(-1.0, 1.0, 1500);
@@ -163,8 +163,8 @@ public class RobotContainer {
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() ->
-                drive.withVelocityX(-m_joystick.getLeftY()) // Drive forward with negative Y (forward)
-                    .withVelocityY(-m_joystick.getLeftX()) // Drive left with negative X (left)
+                drive.withVelocityX(m_joystick.getLeftY()) // Drive forward with negative Y (forward)
+                    .withVelocityY(m_joystick.getLeftX()) // Drive left with negative X (left)
                     .withRotationalRate(-m_joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
             )
         );
