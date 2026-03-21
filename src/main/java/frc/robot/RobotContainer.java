@@ -75,6 +75,14 @@ public class RobotContainer {
     switch(this.Side) {
       default: {
         TimedMove(-0.67, 0, 4370);
+        drivetrain.setControl(drive.withRotationalRate(.5));
+        try {
+          Thread.sleep(750);
+        } catch(InterruptedException e) {
+          drivetrain.setControl(drive.withRotationalRate(0.0));
+        }
+        drivetrain.setControl(drive.withRotationalRate(0.0));
+        TimedMove(0, -0.67 * y_mul, 4307);
         break;
       }
       case MIDDLE: {
