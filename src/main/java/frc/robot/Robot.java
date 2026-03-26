@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.util.sendable.SendableRegistry;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Joystick;
 
 //hi
@@ -24,7 +25,7 @@ import edu.wpi.first.wpilibj.Joystick;
  */
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
-
+  //public DigitalInput DIEDIEDIE = new DigitalInput(0);
   private final RobotContainer m_robotContainer;
  
 
@@ -63,9 +64,10 @@ public class Robot extends TimedRobot {
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
     // block in order for anything in the Command-based framework to work.
     SmartDashboard.putNumber("dist", Distance);
+    m_robotContainer.limelightDistance = Distance;
         }
 
-
+    //System.out.println(DIEDIEDIE.get());
     CommandScheduler.getInstance().run();
   }
 
@@ -90,7 +92,10 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {
-    m_robotContainer.Move(m_robotContainer.x, m_robotContainer.y).schedule();  }
+    m_robotContainer.Move(m_robotContainer.x, m_robotContainer.y).schedule();  
+    m_robotContainer.DoMotor();
+    //m_robotContainer.DoIntake();
+  }
 
   @Override
   public void teleopInit() {

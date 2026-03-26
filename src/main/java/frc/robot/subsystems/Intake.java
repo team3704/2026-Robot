@@ -64,7 +64,7 @@ public class Intake extends SubsystemBase
     public Intake()
     {
         m_limit = new DigitalInput(0);
-      leftIntakeLeader = new TalonFX(39);
+      leftIntakeLeader = new TalonFX(41);
       deployIntake = new TalonFX(45);
 
       intakeConfigs.MotorOutput.NeutralMode = NeutralModeValue.Coast;
@@ -247,11 +247,11 @@ public class Intake extends SubsystemBase
     }
 
     public void deployDown() {
-        if(m_limit.get()) { 
+        if(!m_limit.get()) { 
             deployIntake.stopMotor();
             return;
         }
-        deployIntake.set(-.075);
+        deployIntake.set(-.275);
     }
 
 }

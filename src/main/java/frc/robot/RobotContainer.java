@@ -35,7 +35,7 @@ import com.ctre.phoenix6.hardware.*;
 
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-
+import pabeles.concurrency.IntOperatorTask.Max;
 import frc.robot.LimelightHelpers;
 
 import frc.robot.commands.*;
@@ -47,7 +47,7 @@ import frc.robot.commands.*;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
-  private final CommandXboxController logitech = new CommandXboxController(0);
+  //private final CommandXboxController logitech = new CommandXboxController(0);
 
   private final Intake intake = new Intake();
   private enum side {
@@ -58,10 +58,12 @@ public class RobotContainer {
 
   public double limelightDistance;
 
-  private final boolean DoMove = true;
-  private final boolean DoAuto = true;
+  private final boolean DoAuto = false;
+  private boolean shooterOn = false;
+  private boolean climbUp = false;
+  private boolean climbDown = false;
 
-  public Command Move(double x, double y) {
+  public Command Move(double x, double y)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      {
     return drivetrain.applyRequest(() -> drive.withVelocityX(x).withVelocityY(y));
   }
 
@@ -77,18 +79,13 @@ public class RobotContainer {
         TimedMove(-0.67, 0, 4370);
         drivetrain.setControl(drive.withRotationalRate(.5));
         try {
-          Thread.sleep(750);
+          Thread.sleep(500);
         } catch(InterruptedException e) {
           drivetrain.setControl(drive.withRotationalRate(0.0));
         }
         drivetrain.setControl(drive.withRotationalRate(0.0));
-        TimedMove(0, -0.67 * y_mul, 4307);
-        break;
-      }
-      case MIDDLE: {
-        TimedMove(-1.0, 1.0, 1500);
-        TimedMove(-1.0, 1.0, 1500);
-        break;
+        
+
       }
 
     }
@@ -98,38 +95,43 @@ public class RobotContainer {
     public AutoCommand(side Side) {
     if(!DoAuto) return;
     CompletableFuture<String> future = CompletableFuture.supplyAsync( () -> {
-      switch(Side) {
-      case LEFT: {
-        AutoMove(1);
-        break;
-      }
-      case MIDDLE: {
+        TimedMove(0.67, 0, 700);
         while(Math.abs(limelightDistance - LimelightConstants.TargetDistance) > 5) {
           new AdjustDistance(drivetrain).schedule();
         }
 
-        m_shooter.Start();
-        //DOES THIS NEED TO BE CONTINOULY SET??? IDK............
+        climbUp = true;
 
         try {
-            Thread.sleep(10000);
-            m_shooter.Stop();
+            Thread.sleep(3000);
+            climbUp = false;
         } catch(InterruptedException e) {
-          m_shooter.Stop();
+          climbUp = false;
+          Thread.currentThread().interrupt();
+        }
+
+        TimedMove(.1, 0.0, 300);
+
+        climbDown = true;
+
+        try {
+            Thread.sleep(1500);
+             climbDown = false;
+        } catch(InterruptedException e) {
+           climbDown = false;
           Thread.currentThread().interrupt();
         }
 
 
-        break;
-            }
-      case RIGHT: {
-        AutoMove(-1);
-        break;
-      }
-    }
       return "";
     });
   }
+  }
+
+  public void doshoot() {
+    if(shooterOn) {
+      m_shooter.Start();
+    }
   }
 
   private boolean TimedMove(double x, double y, int time) {
@@ -148,7 +150,16 @@ public class RobotContainer {
     return true;
   }
 
-  private side Side = side.LEFT;
+  public void DoMotor() {
+    if(climbUp) {
+      new ClimberCommands.ClimbUp(m_climber).schedule();
+    }
+    if(climbDown) {
+      new ClimberCommands.ClimbDown(m_climber).schedule();
+    }
+  }
+
+  private side Side = side.MIDDLE;
 
   // The robot's subsystems and commands are defined here...
    //private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
@@ -161,8 +172,9 @@ public class RobotContainer {
             PIDController distancePID = new PIDController(kP, kI, kD);
 
             private double OldMax = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
-   private double MaxSpeed = 1.0;// * TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
-    private double MaxAngularRate = RotationsPerSecond.of(0.35).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
+   private double MaxSpeed = 1.0; //* TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
+   private double otherMaxSppedTrollRageBait = 4.5; 
+   private double MaxAngularRate = RotationsPerSecond.of(0.35).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -174,26 +186,10 @@ public class RobotContainer {
     private final Shooter m_shooter = new Shooter();
     private final Climber m_climber = new Climber();
 
-    private final Joystick supportController = new Joystick(1);
-
-    private final Trigger supportUpTrigger = new Trigger(() -> supportController.getRawAxis(1) > .5);
-    private final Trigger supportDownTrigger = new Trigger(() -> supportController.getRawAxis(1) < -.5);
-
-    private final IntakeCommands intakeCommands = new IntakeCommands();
-
-    //intake
-    private final JoystickButton ourpleButton = new JoystickButton(supportController, 1);
-
-    //shoot
-    private final JoystickButton redButton = new JoystickButton(supportController, 2);
-    //puke
-    private final JoystickButton oinkButton = new JoystickButton(supportController, 3);
-
-    //adjust
-    private final JoystickButton limeButton = new JoystickButton(supportController, 4);
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
     private final CommandXboxController m_joystick = new CommandXboxController(0);
+     private final CommandXboxController m_support = new CommandXboxController(1);
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
@@ -216,19 +212,16 @@ public class RobotContainer {
             )
         );
     
+    m_support.b().whileTrue(new Shoot(m_shooter));
+m_support.a().whileTrue(new AdjustDistance(drivetrain));
+    m_support.y().whileTrue(new IntakeCommands.IntakeCommand(intake));
 
-    
+    m_support.x().whileTrue(new IntakeCommands.UpDeploy(intake));
+    m_support.x().whileFalse(new IntakeCommands.DownDeploy(intake));
 
-    redButton.whileTrue(new Shoot(m_shooter));
-    ourpleButton.whileTrue(new IntakeCommands.IntakeCommand(intake));
-    oinkButton.whileTrue(new IntakeCommands.UpDeploy(intake));
-    oinkButton.whileFalse(new IntakeCommands.DownDeploy(intake));
-
-    oinkButton.whileTrue(new IntakeCommands.EjectCommand(intake));
-    limeButton.whileTrue(new AdjustDistance(drivetrain));
-
-    supportUpTrigger.whileTrue(new ClimberCommands.ClimbUp(m_climber));
-    supportDownTrigger.whileTrue(new ClimberCommands.ClimbDown(m_climber));
+    m_support.rightTrigger().whileTrue(new IntakeCommands.EjectCommand(intake));
+    m_support.povUp().whileTrue(new ClimberCommands.ClimbUp(m_climber));
+    m_support.povDown().whileTrue(new ClimberCommands.ClimbDown(m_climber));
 /*
  * Joystick Y = quasistatic forward
  * Joystick A = quasistatic reverse

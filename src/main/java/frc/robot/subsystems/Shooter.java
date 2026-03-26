@@ -27,8 +27,6 @@ public class Shooter extends SubsystemBase {
     private final TalonFX rightShooter;
 
     private final VoltageOut m_voltReq = new VoltageOut(0.0);
-    
-    private final SysIdRoutine m_sysIdRoutine;
 
     private PIDController Lpiddy = new PIDController(0, 0, 0);
     private PIDController Rpiddy = new PIDController(0, 0, 0);
@@ -44,28 +42,14 @@ public class Shooter extends SubsystemBase {
         leftShooterConfigs.MotorOutput.NeutralMode = NeutralModeValue.Coast;
         rightShooterConfigs.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
-        leftShooterConfigs.OpenLoopRamps.DutyCycleOpenLoopRampPeriod = 0.5;
-        rightShooterConfigs.OpenLoopRamps.DutyCycleOpenLoopRampPeriod = 0.5;
+        leftShooterConfigs.OpenLoopRamps.DutyCycleOpenLoopRampPeriod = 0.05;
+        rightShooterConfigs.OpenLoopRamps.DutyCycleOpenLoopRampPeriod = 0.05;
 
         leftShooter = new TalonFX(6);
         rightShooter = new TalonFX(7);
         leftShooter.getConfigurator().apply(leftShooterConfigs);
         rightShooter.getConfigurator().apply(rightShooterConfigs);
 
-m_sysIdRoutine = new SysIdRoutine(
-      new SysIdRoutine.Config(
-         null,        // Use default ramp rate (1 V/s)
-         Volts.of(36), // Reduce dynamic step voltage to 4 to prevent brownout
-         null,        // Use default timeout (10 s)
-                      // Log state with Phoenix SignalLogger class
-         (state) -> SignalLogger.writeString("state: Shooter", state.toString())
-      ),
-      new SysIdRoutine.Mechanism(
-         (volts) -> leftShooter.setControl(m_voltReq.withOutput(volts.in(Volts.of(12.0).unit()))),
-         null,
-         this
-      )
-   );
 
 
         // var configs = new Slot0Configs();
@@ -79,21 +63,13 @@ m_sysIdRoutine = new SysIdRoutine(
 
     public void Start() {
         // leftShooterLeader.setControl(torqueveldude.withOutput(Speed));
-        leftShooter.set(SubsystemConstants.ShooterSpeed);
-        rightShooter.set(-SubsystemConstants.ShooterSpeed);
+        leftShooter.set(-SubsystemConstants.ShooterSpeed);
+        rightShooter.set(SubsystemConstants.ShooterSpeed);
 
     }
 
     public void Stop() {
         leftShooter.stopMotor();
         rightShooter.stopMotor();
-    }
-
-    public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
-        return m_sysIdRoutine.quasistatic(direction);
-    }
-
-    public Command sysIdDynamic(SysIdRoutine.Direction direction) {
-    return m_sysIdRoutine.dynamic(direction);
     }
 }

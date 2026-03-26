@@ -50,7 +50,7 @@ public class AdjustDistance extends Command {
         //KpDistance is a proportional constant, no idea what it does lol but documentation says to use
         m_swerve.setControl(
             drive.withVelocityX(error * LimelightConstants.KpDistance)
-            .withRotationalRate(xError)
+            .withRotationalRate( xError)
         );
     }
 }
