@@ -31,23 +31,26 @@ public class Shooter extends SubsystemBase {
  
     private final SysIdRoutine m_sysIdRoutine;
 
-    private final TalonFXConfiguration leftShooterConfigs = new TalonFXConfiguration();
-    private final TalonFXConfiguration rightShooterConfigs = new TalonFXConfiguration();
+    private final TalonFXConfiguration shooterConfigs = new TalonFXConfiguration();
+   // private final TalonFXConfiguration rightShooterConfigs = new TalonFXConfiguration();
 
 
     public double Speed = 6.0;
 
     public Shooter() {
 
-        leftShooterConfigs.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-        rightShooterConfigs.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-
-        leftShooterConfigs.OpenLoopRamps.DutyCycleOpenLoopRampPeriod = 0.5;
-        rightShooterConfigs.OpenLoopRamps.DutyCycleOpenLoopRampPeriod = 0.5;
+        shooterConfigs.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+        shooterConfigs.OpenLoopRamps.DutyCycleOpenLoopRampPeriod = 0.1;
 
         leftShooter = new TalonFX(41);
         rightShooter = new TalonFX(1);
+        
+        leftShooter.getConfigurator().apply(shooterConfigs);
+        rightShooter.getConfigurator().apply(shooterConfigs);
 
+        rightShooter.setControl(new Follower(leftShooter.getDeviceID(), MotorAlignmentValue.Aligned)); //set to opposemasterdirection if theyre against eachother
+
+/*
         m_sysIdRoutine =
    new SysIdRoutine(
       new SysIdRoutine.Config(
@@ -63,7 +66,7 @@ public class Shooter extends SubsystemBase {
          this
       )
    );
-
+*/
         // var configs = new Slot0Configs();
         // configs.kS = 2.5; // To account for friction, add 2.5 A of static feedforward
         // configs.kP = 5; // An error of 1 rotation per second results in 5 A output
@@ -74,15 +77,11 @@ public class Shooter extends SubsystemBase {
     }
 
     public void Start() {
-        // leftShooterLeader.setControl(torqueveldude.withOutput(Speed));
-        leftShooter.set(Lpiddy.calculate(Speed));
-        rightShooter.set(Rpiddy.calculate(Speed));
-
+       leftShooter.set(0.6); // no need to control the right motor since it follows the left
     }
 
     public void Stop() {
         leftShooter.stopMotor();
-        rightShooter.stopMotor();
     }
 
     public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
