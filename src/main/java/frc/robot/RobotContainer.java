@@ -150,6 +150,7 @@ public class RobotContainer {
     return true;
   }
 
+  
   public void DoMotor() {
     if(climbUp) {
       new ClimberCommands.ClimbUp(m_climber).schedule();
@@ -235,9 +236,17 @@ m_support.a().whileTrue(new AdjustDistance(drivetrain));
    *
    * @return the command to run in autonomous
    */
+  public Command driveWithTime(double x, double y, double seconds)
+  {
+    return drivetrain.applyRequest(() ->
+      drive.withVelocityX(x).withVelocityY(y)
+      ).withTimeout(seconds);
+  }
+  
   public Command getAutonomousCommand() 
   {
-      return new AutoCommand(this.Side);
-    }
+      return driveWithTime(0.4, 0, 5.0)
+      .andThen(driveWithTime(0.4, 0,2.0));
+  }
 
 }
