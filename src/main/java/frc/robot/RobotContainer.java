@@ -229,22 +229,14 @@ public class RobotContainer {
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() ->
-                drive.withVelocityX(m_joystick.getLeftY()) // Drive forward with negative Y (forward)
-                    .withVelocityY(m_joystick.getLeftX()) // Drive left with negative X (left)
+                drive.withVelocityX(-m_joystick.getLeftY()) // Drive forward with negative Y (forward)
+                    .withVelocityY(-m_joystick.getLeftX()) // Drive left with negative X (left)
                     .withRotationalRate(-m_joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
             )
         );
     
-    m_support.b().whileTrue(new Shoot(m_shooter));
-m_support.a().whileTrue(new AdjustDistance(drivetrain));
-    m_support.y().whileTrue(new IntakeCommands.IntakeCommand(intake));
-
-    m_support.x().whileTrue(new IntakeCommands.UpDeploy(intake));
-    m_support.x().whileFalse(new IntakeCommands.DownDeploy(intake));
-
-    m_support.rightTrigger().whileTrue(new IntakeCommands.EjectCommand(intake));
-    m_support.povUp().whileTrue(new ClimberCommands.ClimbUp(m_climber));
-    m_support.povDown().whileTrue(new ClimberCommands.ClimbDown(m_climber));
+    m_joystick.b().whileTrue(new Shoot(m_shooter));
+//m_support.a().whileTrue(new AdjustDistance(drivetrain));
 /*
  * Joystick Y = quasistatic forward
  * Joystick A = quasistatic reverse
