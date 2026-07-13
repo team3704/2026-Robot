@@ -64,13 +64,35 @@ public class RobotContainer {
   private boolean climbDown = false;
 
   public Command Move(double x, double y)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      {
-    return drivetrain.applyRequest(() -> drive.withVelocityX(x).withVelocityY(y));
+    return drivetrain.applyRequest(() -> drive.withVelocityX(x).withVelocityY(y).withRotationalRate(this.turn));
   }
+
+  // public Command Turn(double x)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      {
+  //   return drivetrain.applyRequest(() -> drive.withRotationalRate(x));
+  // }
 
   public double x = 0;
   public double y = 0;
+  public double turn = 0;
+
+  public class AutoInit extends Command {
+    public AutoInit() {
+      CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> {
+        turnWithTime(-.4,6);
+        driveWithTime(.8,0,2);
+        turnWithTime(-.4,6);
+        driveWithTime(.5,0,4);
+
+        return "";
+      });
+
+
+    }
+  }
 
   private void AutoMove(int y_mul) {
+
+    
 
     //1.57 seconds to travel 5 feet (60 inches)
     //we travel at 38.21 inches per second.
@@ -139,7 +161,7 @@ public class RobotContainer {
     this.y = y;
 
     try {
-      Thread.sleep(time);
+      Thread.sleep(time * 1000);
     } catch(InterruptedException e) {
       this.x = 0;
       this.y = 0;
@@ -178,7 +200,7 @@ public class RobotContainer {
    private double MaxAngularRate = RotationsPerSecond.of(0.35).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
     /* Setting up bindings for necessary control of the swerve drive platform */
-    private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
+    private final SwerveRequest.RobotCentric drive = new SwerveRequest.RobotCentric()
             .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
@@ -236,17 +258,33 @@ m_support.a().whileTrue(new AdjustDistance(drivetrain));
    *
    * @return the command to run in autonomous
    */
-  public Command driveWithTime(double x, double y, double seconds)
+  public void driveWithTime(double x, double y, double seconds)
   {
-    return drivetrain.applyRequest(() ->
-      drive.withVelocityX(x).withVelocityY(y)
-      ).withTimeout(seconds);
+    this.x = x;
+    this.y = y;
+    try {
+    Thread.sleep((int) seconds * 1000);
+    } catch(InterruptedException e) {
+
+    }
+
+    this.x = 0;
+    this.y = 0;
+  }
+
+  public void turnWithTime(double amount, double seconds) {
+    this.turn = amount;
+        try {
+    Thread.sleep((int) seconds * 1000);
+    } catch(InterruptedException e) {
+
+    }
+    this.turn = 0;
   }
   
   public Command getAutonomousCommand() 
   {
-      return driveWithTime(0.4, 0, 5.0)
-      .andThen(driveWithTime(0.4, 0,2.0));
+      return new AutoInit();
   }
 
 }

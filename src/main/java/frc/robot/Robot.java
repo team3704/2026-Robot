@@ -84,16 +84,18 @@ public class Robot extends TimedRobot {
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
-    if (m_autonomousCommand != null) {
+    
       m_autonomousCommand.schedule();
-    }
+    
   }
 
   /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {
-    m_robotContainer.Move(m_robotContainer.x, m_robotContainer.y).schedule();  
-    m_robotContainer.DoMotor();
+    //System.out.println(m_robotContainer.x + " " + m_robotContainer.y + " " + m_robotContainer.turn);
+    m_robotContainer.Move(m_robotContainer.x, m_robotContainer.y).schedule();;
+    //m_robotContainer.Turn(m_robotContainer.turn).schedule();
+    //m_robotContainer.DoMotor();
     //m_robotContainer.DoIntake();
   }
 
